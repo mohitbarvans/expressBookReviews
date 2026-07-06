@@ -1,4 +1,6 @@
 const express = require('express');
+const axios = require('axios');
+
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
@@ -22,53 +24,77 @@ public_users.post("/register", (req, res) => {
     password: password
   });
 
-  return res.status(200).json({ message: "User successfully registered. Now you can login." });
+  return res.status(200).json({
+    message: "User successfully registered. Now you can login."
+  });
 
 });
 
-// Get the book list available in the shop
-public_users.get('/', function (req, res) {
+// Task 10 - Get the book list available in the shop using Async/Await & Axios
+public_users.get('/', async function (req, res) {
 
-  return res.status(200).send(JSON.stringify(books, null, 4));
-
-});
-
-// Get book details based on ISBN
-public_users.get('/isbn/:isbn', function (req, res) {
-
-  const isbn = req.params.isbn;
-
-  return res.status(200).json(books[isbn]);
+  try {
+    const response = await axios.get("http://localhost:5000/");
+    return res.status(200).json(response.data);
+  } catch (err) {
+    return res.status(500).json(err);
+  }
 
 });
 
-// Get book details based on author
-public_users.get('/author/:author', function (req, res) {
+// Task 11 - Get book details based on ISBN using Async/Await & Axios
+public_users.get('/isbn/:isbn', async function (req, res) {
 
-  const author = req.params.author;
+  try {
+    const isbn = req.params.isbn;
 
-  const bookKeys = Object.keys(books);
+    const response = await axios.get(
+      `http://localhost:5000/isbn/${isbn}`
+    );
 
-  const filteredBooks = bookKeys
-    .filter(key => books[key].author === author)
-    .map(key => books[key]);
+    return res.status(200).json(response.data);
 
-  return res.status(200).json(filteredBooks);
+  } catch (err) {
+    return res.status(500).json(err);
+  }
 
 });
 
-// Get all books based on title
-public_users.get('/title/:title', function (req, res) {
+// Task 12 - Get book details based on author using Async/Await & Axios
+public_users.get('/author/:author', async function (req, res) {
 
-  const title = req.params.title;
+  try {
 
-  const bookKeys = Object.keys(books);
+    const author = req.params.author;
 
-  const filteredBooks = bookKeys
-    .filter(key => books[key].title === title)
-    .map(key => books[key]);
+    const response = await axios.get(
+      `http://localhost:5000/author/${author}`
+    );
 
-  return res.status(200).json(filteredBooks);
+    return res.status(200).json(response.data);
+
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+
+});
+
+// Task 13 - Get all books based on title using Async/Await & Axios
+public_users.get('/title/:title', async function (req, res) {
+
+  try {
+
+    const title = req.params.title;
+
+    const response = await axios.get(
+      `http://localhost:5000/title/${title}`
+    );
+
+    return res.status(200).json(response.data);
+
+  } catch (err) {
+    return res.status(500).json(err);
+  }
 
 });
 
